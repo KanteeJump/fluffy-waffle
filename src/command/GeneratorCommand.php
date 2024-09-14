@@ -26,28 +26,26 @@ class GeneratorCommand extends Command {
         $name = $input->getArgument("name");
         if (!preg_match("/^[a-zA-Z]+$/", $name)) {
             $io->error("The name of the plugin must be only letters");
-            return Command::FAILURE;
+            return Command::INVALID;
         }
 
-        $test = $this->argumentWithPrompt($input, $io, "test", "Is this a test plugin?");
-        $author = $input->getArgument("author") ?: $io->ask("What is the author of the plugin?");
-        if (!preg_match("/^[a-zA-Z0-9]+$/", $author)) {
+        $author = $this->argumentWithPrompt($input, $io, "author", "What is the author of the plugin?");
+
+        if (!PluginInfoValidate::validateAlphaNumeric($author)) {
             $io->error("The author of the plugin must be only letters and numbers");
-            return Command::FAILURE;
+            return Command::INVALID;
         }
 
-        $regexVersion = "/^[0-9]+\.[0-9]+\.[0-9]+$/";
-
-        $apiVersion = $input->getArgument("api-version") ?: $io->ask("What is the version of the plugin API?");
-        if (!preg_match($regexVersion, $apiVersion)) {
+        $apiVersion = $this->argumentWithPrompt($input, $io, "api-version", "What is the version of the plugin API?");
+        if (!PluginInfoValidate::validateVersion($apiVersion)) {
             $io->error("The version of the plugin API must be in the format x.x.x");
-            return Command::FAILURE;
+            return Command::INVALID;
         }
 
-        $pluginVersion = $input->getArgument("plugin-version") ?: $io->ask("What is the version of the plugin?");
-        if (PluginInfoValidate::validateVersion($pluginVersion)) {
+        $pluginVersion = $this->argumentWithPrompt($input, $io, "plugin-version", "What is the version of the plugin?");
+        if (!PluginInfoValidate::validateVersion($pluginVersion)) {
             $io->error("The version of the plugin must be in the format x.x.x");
-            return Command::FAILURE;
+            return Command::INVALID;
         }
 
         $io->success("Generating plugin skeleton for $name");
