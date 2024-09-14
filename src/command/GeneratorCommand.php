@@ -2,6 +2,7 @@
 
 namespace app\command;
 
+use app\validate\PluginInfoValidate;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -28,6 +29,7 @@ class GeneratorCommand extends Command {
             return Command::FAILURE;
         }
 
+        $test = $this->argumentWithPrompt($input, $io, "test", "Is this a test plugin?");
         $author = $input->getArgument("author") ?: $io->ask("What is the author of the plugin?");
         if (!preg_match("/^[a-zA-Z0-9]+$/", $author)) {
             $io->error("The author of the plugin must be only letters and numbers");
@@ -43,13 +45,17 @@ class GeneratorCommand extends Command {
         }
 
         $pluginVersion = $input->getArgument("plugin-version") ?: $io->ask("What is the version of the plugin?");
-        if (!preg_match($regexVersion, $pluginVersion)) {
+        if (PluginInfoValidate::validateVersion($pluginVersion)) {
             $io->error("The version of the plugin must be in the format x.x.x");
             return Command::FAILURE;
         }
 
         $io->success("Generating plugin skeleton for $name");
         return Command::SUCCESS;
+    }
+
+    public function argumentWithPrompt(InputInterface $input, SymfonyStyle $output, string $name, string $description): string {
+        return $input->getArgument($name) ?: $output->ask($description);
     }
 
 }
