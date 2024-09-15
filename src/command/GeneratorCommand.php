@@ -2,7 +2,9 @@
 
 namespace app\command;
 
-use app\validate\PluginInfoValidate;
+use app\handler\GeneratorHandler;
+use app\utils\PluginInfo;
+use app\utils\PluginInfoValidate;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -24,31 +26,36 @@ class GeneratorCommand extends Command {
         $io = new SymfonyStyle($input, $output);
 
         $name = $input->getArgument("name");
-        if (!preg_match("/^[a-zA-Z]+$/", $name)) {
-            $io->error("The name of the plugin must be only letters");
+        if (!PluginInfoValidate::validatePluginName($name)) {
+            $io->error("The name of the plugin must be only letters and numbers");
             return Command::INVALID;
         }
 
-        $author = $this->argumentWithPrompt($input, $io, "author", "What is the author of the plugin?");
-
+        $author = $this->argumentWithPrompt($input, $io, "author", "What is the author of the plugin? example: Kantee");
         if (!PluginInfoValidate::validateAlphaNumeric($author)) {
             $io->error("The author of the plugin must be only letters and numbers");
             return Command::INVALID;
         }
 
-        $apiVersion = $this->argumentWithPrompt($input, $io, "api-version", "What is the version of the plugin API?");
+        $apiVersion = $this->argumentWithPrompt($input, $io, "api-version", "What is the version of the plugin API? example: 5.0.0");
         if (!PluginInfoValidate::validateVersion($apiVersion)) {
             $io->error("The version of the plugin API must be in the format x.x.x");
             return Command::INVALID;
         }
 
-        $pluginVersion = $this->argumentWithPrompt($input, $io, "plugin-version", "What is the version of the plugin?");
+        $pluginVersion = $this->argumentWithPrompt($input, $io, "plugin-version", "What is the version of the plugin? example: 1.0.0");
         if (!PluginInfoValidate::validateVersion($pluginVersion)) {
             $io->error("The version of the plugin must be in the format x.x.x");
             return Command::INVALID;
         }
 
+        $pluginInfo = new PluginInfo($name, $author, $apiVersion, $pluginVersion);
+        $generatorHandler = new GeneratorHandler($pluginInfo);
+
         $io->success("Generating plugin skeleton for $name");
+
+        $generatorHandler->generate();
+
         return Command::SUCCESS;
     }
 

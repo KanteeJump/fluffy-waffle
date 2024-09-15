@@ -1,0 +1,5 @@
+name: plugin_name
+author: plugin_author
+main: plugin_main
+version: plugin_version
+api: plugin_api_version

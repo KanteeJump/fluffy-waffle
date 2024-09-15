@@ -1,0 +1,17 @@
+<?php
+
+namespace plugin_author;
+
+use pocketmine\plugin\PluginBase;
+
+class plugin_name extends PluginBase {
+
+    public function onEnable(): void {
+        $this->getLogger()->info("Plugin plugin_name enabled!");
+    }
+
+    public function onDisable(): void {
+        $this->getLogger()->info("Plugin plugin_name disabled!");
+    }
+
+}
